@@ -12,7 +12,7 @@
     <img src="https://github-readme-stats.vercel.app/api?username=smsram&show_icons=true&theme=radical&hide_border=true" alt="Meher's GitHub stats" />
   </a>
   &nbsp;&nbsp;
-  <a href="https://github.com/smehersivaram">
+  <a href="https://github.com/smsram">
     <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=smsram&layout=compact&hide_border=true&theme=radical" alt="Top languages" />
   </a>
 </p>
@@ -83,7 +83,7 @@ Example badge:
 ---
 
 <p align="center">
-  <a href="https://github.com/smehersivaram">
+  <a href="https://github.com/smsram">
     <img src="https://camo.githubusercontent.com/4f8c9f2f6f1b7f2a3fa3c6d4a6a1d9b3b0f0a7f8/68747470733a2f2f692e696d6775722e636f6d2f4a6f796f6b4a2e676966" alt="wave"/>
   </a>
 </p>
