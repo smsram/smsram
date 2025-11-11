@@ -8,12 +8,12 @@
 ![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Fira%20Code\&size=24\&duration=3000\&pause=1000\&color=ffffff\&background=00000000\&lines=AI+%26+ML+Student;Full-Stack+Enthusiast;Gamer+%26+Musician)
 
 <p align="center">
-  <a href="https://github.com/smehersivaram" target="_blank">
-    <img src="https://github-readme-stats.vercel.app/api?username=smehersivaram&show_icons=true&theme=radical&hide_border=true" alt="Meher's GitHub stats" />
+  <a href="https://github.com/smsram" target="_blank">
+    <img src="https://github-readme-stats.vercel.app/api?username=smsram&show_icons=true&theme=radical&hide_border=true" alt="Meher's GitHub stats" />
   </a>
   &nbsp;&nbsp;
   <a href="https://github.com/smehersivaram">
-    <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=smehersivaram&layout=compact&hide_border=true&theme=radical" alt="Top languages" />
+    <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=smsram&layout=compact&hide_border=true&theme=radical" alt="Top languages" />
   </a>
 </p>
 
