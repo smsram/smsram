@@ -1,6 +1,6 @@
 # 👋 Hi, I'm Meher Siva Ram
 
-![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Poppins\&size=28\&duration=3000\&pause=800\&color=00FFFF\&background=00000000\&center=true\&vCenter=true\&width=800\&lines=AI+%26+ML+Student;Full-Stack+Developer;JavaScript+%26+Python+Lover;HTML+%26+CSS+Creator;Gamer+%26+Musician)
+![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Poppins\&size=28\&duration=3000\&pause=800\&color=00FFFF\&background=00000000\&center=true\&vCenter=true\&width=800\&lines=AI+%26+ML+Student;Full-Stack+Developer;JavaScript+%26+Python+Lover;HTML+%26+CSS+Creator)
 
 <p align="center">
   <a href="https://github.com/smsram" target="_blank">
@@ -19,7 +19,7 @@
 * 🎓 AI & ML student at **Godavari Global University**.
 * 💻 Passionate about **Python, Java, JavaScript, HTML, CSS, SQL**, and modern web tech.
 * 🎮 Fan of **Brawl Stars**, blending creativity and logic through coding.
-* 🎵 Running my YouTube channel **[SMSRam](https://www.youtube.com/@smsram1)** for music and tech content.
+* ▶️ Running my YouTube channel **[SMSRam](https://www.youtube.com/@smsram1)** for tech content.
 
 ---
 
@@ -33,9 +33,9 @@
 
 ## 🚀 Featured Projects
 
-* **[College Drive - GGU (Next.js Conversion)](https://github.com/smsram/college-drive-ggu)** — Migrated college website to Next.js with responsive design and Tailwind styling.
-* **[DBMS Mini Project](https://github.com/smsram/dbms-mini-project)** — Database design, ER modeling, normalization, and SQL implementation.
-* **[SMSRam Landing Page](https://github.com/smsram/landing-page)** — A modern personal site built with HTML, CSS, and JavaScript.
+* **[College Drive - GGU (Next.js Conversion)](https://college-drive.vercel.app)** — A student media site where manage their study files built with HTML, CSS, and JavaScript.
+* **[Code Pupil](https://github.com/smsram/code-pupil)** — A faculty monitoring project to condect tests to students.
+* **[SMSRam Landing Page](https://smsram.github.io/portfolio)** — A modern personal site built with HTML, CSS, and JavaScript.
 
 ---
 
