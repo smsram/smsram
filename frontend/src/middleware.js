@@ -3,26 +3,20 @@ import { NextResponse } from 'next/server';
 export function middleware(req) {
   const url = req.nextUrl;
   const hostname = req.headers.get('host') || '';
+  
+  // Directly pull your apex root domain from the systemic environment (e.g., 'smsram.me')
+  const baseDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
 
-  const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-
-  // ======================================================================
-  // DYNAMIC ROOT DOMAIN EXTRACTION
-  // ======================================================================
-  // If request is 'admin.smsram.me' or 'hub.smsram.me', baseDomain becomes 'smsram.me'
-  // If it's just 'smsram.me', baseDomain remains 'smsram.me'
-  const baseDomain = hostname.replace(/^(admin\.|hub\.)/, '');
+  if (!baseDomain) {
+    console.error('[Middleware Warning] NEXT_PUBLIC_ROOT_DOMAIN variable missing from env configuration grid.');
+    return NextResponse.next();
+  }
 
   // ==========================
   // SUBDOMAIN DETECTION
   // ==========================
-  const isHubSubdomain = isLocalhost 
-    ? hostname.startsWith('hub.localhost') 
-    : hostname.startsWith(`hub.${baseDomain}`);
-
-  const isAdminSubdomain = isLocalhost 
-    ? hostname.startsWith('admin.localhost') 
-    : hostname.startsWith(`admin.${baseDomain}`);
+  const isHubSubdomain = hostname === `hub.${baseDomain}`;
+  const isAdminSubdomain = hostname === `admin.${baseDomain}`;
 
   // ==========================
   // HUB REDIRECTS
@@ -36,9 +30,7 @@ export function middleware(req) {
   if (!isHubSubdomain && url.pathname.startsWith('/hub')) {
     const newUrl = new URL(req.url);
     newUrl.pathname = url.pathname.replace(/^\/hub/, '') || '/';
-    
-    // Dynamically preserve localhost ports or swap production hosts safely
-    newUrl.host = isLocalhost ? `hub.localhost:${url.port || 3000}` : `hub.${baseDomain}`;
+    newUrl.host = `hub.${baseDomain}`;
     return NextResponse.redirect(newUrl);
   }
 
@@ -54,9 +46,7 @@ export function middleware(req) {
   if (!isAdminSubdomain && url.pathname.startsWith('/admin')) {
     const newUrl = new URL(req.url);
     newUrl.pathname = url.pathname.replace(/^\/admin/, '') || '/';
-    
-    // Dynamically preserve localhost ports or swap production hosts safely
-    newUrl.host = isLocalhost ? `admin.localhost:${url.port || 3000}` : `admin.${baseDomain}`;
+    newUrl.host = `admin.${baseDomain}`;
     return NextResponse.redirect(newUrl);
   }
 
