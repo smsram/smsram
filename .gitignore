@@ -1,0 +1,25 @@
+# Dependency Directories
+node_modules/
+.pnpm-store/
+.yarn/
+
+# Build & Output Enclaves
+.next/
+dist/
+build/
+out/
+.pnpm-debug.log*
+npm-debug.log*
+
+# Strict Secret Key Protection Mask
+.env
+.env.local
+.env.production
+.env.development
+*.local
+
+# Allow Configuration Structural Blueprints Natively
+!.env.example
+
+api.txt
+structure.txt

@@ -1,0 +1,114 @@
+/* 1. External Imports MUST go first */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
+
+/* 2. Tailwind Core Import */
+@import "tailwindcss";
+
+/* 3. Tailwind Theme Configuration */
+@theme {
+  --color-background: #f9f9f9;
+  --color-on-background: #1a1c1c;
+  --color-primary: #000000;
+  --color-on-primary: #ffffff;
+  --color-surface: #f9f9f9;
+  --color-on-surface: #1a1c1c;
+  --color-surface-variant: #e2e2e2;
+  --color-on-surface-variant: #4c4546;
+  --color-surface-container: #eeeeee;
+  --color-surface-container-low: #f3f3f4;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-high: #e8e8e8;
+  --color-surface-bright: #f9f9f9;
+  --color-outline: #7e7576;
+  --color-outline-variant: #cfc4c5;
+  --color-inverse-primary: #c6c6c6;
+  
+  /* Brand Accents */
+  --color-accent-blue: #03b5ff;
+  --color-accent-purple: #730697;
+  --color-accent-orange: #f57f15;
+  --color-editor-bg: #1e1e1e;
+  
+  /* Custom Spacing - Fixed to standard rem units for Tailwind utility generation */
+  --spacing-base: 0.25rem;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-gutter: 1.5rem;
+  --spacing-xl: 3rem;
+  --spacing-margin-mobile: 1rem;
+  --spacing-margin-desktop: 3rem;
+
+  /* Custom Fonts */
+  --font-display: "Geist", sans-serif;
+  --font-body-sm: "Geist", sans-serif;
+  --font-body-lg: "Geist", sans-serif;
+  --font-headline-md: "Geist", sans-serif;
+  --font-headline-lg: "Geist", sans-serif;
+  --font-code: "JetBrains Mono", monospace;
+  --font-label-caps: "JetBrains Mono", monospace;
+}
+
+/* 4. Base Styles & Custom Classes */
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-on-background);
+    font-family: var(--font-body-lg);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Map the Dark Theme Colors dynamically via parent tree overrides */
+@layer base {
+  .dark {
+    --color-background: #000000;
+    --color-surface: #0a0a0a;
+    --color-surface-container-lowest: #000000;
+    --color-surface-container: #1e1e1e;
+    --color-surface-container-low: #141414;
+    --color-surface-container-high: #2a2a2a;
+    --color-surface-bright: #1c1c1c;
+    
+    --color-on-background: #e2e2e2;
+    --color-on-surface: #e2e2e2;
+    --color-on-surface-variant: #a0a0a0;
+    
+    --color-outline: #444444;
+    --color-outline-variant: #262626;
+    
+    --color-primary: #ffffff;
+    --color-on-primary: #000000;
+    
+    --color-inverse-primary: #555555;
+    --color-editor-bg: #0d0d0d;
+  }
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.input-glow:focus {
+  outline: none;
+  border-color: var(--color-accent-blue);
+  box-shadow: 0 0 0 1px var(--color-accent-blue);
+}
+
+/* Scrollbar styling for editor/panes */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
