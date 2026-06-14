@@ -1,0 +1,27 @@
+{
+  "name": "smsram-baas",
+  "version": "1.0.0",
+  "description": "Personal Cloud Database and Storage Hub",
+  "main": "app/src/server.js",
+  "scripts": {
+    "start": "node app/src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "better-sqlite3": "^9.4.0",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.1",
+    "axios": "^1.6.2",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "@huggingface/hub": "^0.15.1",
+    "@huggingface/inference": "^2.8.1",
+    "mammoth": "^1.6.0",
+    "pdf-parse": "^1.1.1",
+    "pdf-img-convert": "^1.2.1",
+    "tesseract.js": "^5.1.1",
+    "xlsx": "^0.18.5",
+    "http-proxy-middleware": "^3.0.3" 
+  }
+}

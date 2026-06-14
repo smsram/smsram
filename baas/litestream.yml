@@ -1,0 +1,27 @@
+# /app/litestream.yml
+access-key-id: "${B2_KEY_ID}"
+secret-access-key: "${B2_APPLICATION_KEY}"
+
+dbs:
+  # 🟢 LINK BACK TO HISTORY: Points Litestream directly to your root bucket files
+  - path: /app/data/master_registry.db
+    replicas:
+      - type: s3
+        endpoint: "${B2_ENDPOINT}"
+        bucket: "${B2_BUCKET}"
+        path: master_registry.db
+        sync-interval: 60s
+        checkpoint-interval: 30m
+
+  # 🟢 FLEET TENANT MANAGEMENT: Automates all other custom databases into a subfolder
+  - dir: /app/data
+    pattern: "*.db"
+    exclude: "master_registry.db" # Avoids duplication conflicts
+    watch: true
+    replicas:
+      - type: s3
+        endpoint: "${B2_ENDPOINT}"
+        bucket: "${B2_BUCKET}"
+        path: tenants
+        sync-interval: 60s
+        checkpoint-interval: 30m
