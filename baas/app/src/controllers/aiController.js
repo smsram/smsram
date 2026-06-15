@@ -8,26 +8,25 @@ const crypto = require('crypto');
 
 const PROVIDER_POOL = {
     default: [
-        { name: 'Cerebras', url: 'https://api.cerebras.ai/v1/chat/completions', model: 'llama-3.3-70b', token: 'CEREBRAS_API_KEY', supportsVision: false },
-        { name: 'Cloudflare', url: `https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/google/gemma-2b-it-lora`, model: '@cf/google/gemma-2-2b-it-lora', token: 'CF_API_TOKEN', isCloudflare: true, supportsVision: false },
-        { name: 'Cloudflare Vision', url: `https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`, model: '@cf/meta/llama-3.2-11b-vision-instruct', token: 'CF_API_TOKEN', isCloudflare: true, supportsVision: true },
-        { name: 'Mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest', token: 'MISTRAL_API_KEY', supportsVision: true }
+        { name: 'Cerebras', url: 'https://api.cerebras.ai/v1/chat/completions', model: 'llama3.1-8b', token: 'CEREBRAS_API_KEY', maxOutput: 8192, supportsVision: false },
+        { name: 'Cloudflare', url: `https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/google/gemma-2b-it-lora`, model: '@cf/google/gemma-2-2b-it-lora', token: 'CF_API_TOKEN', maxOutput: 4096, isCloudflare: true, supportsVision: false },
+        { name: 'Cloudflare Vision', url: `https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`, model: '@cf/meta/llama-3.2-11b-vision-instruct', token: 'CF_API_TOKEN', maxOutput: 4096, isCloudflare: true, supportsVision: true },
+        { name: 'Mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest', token: 'MISTRAL_API_KEY', maxOutput: 8192, supportsVision: true }
     ],
     thinking: [
-        { name: 'Mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-large-latest', token: 'MISTRAL_API_KEY', supportsVision: true }
+        { name: 'Mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-large-latest', token: 'MISTRAL_API_KEY', maxOutput: 8192, supportsVision: true }
     ],
     pro: [
-        { name: 'Cerebras', url: 'https://api.cerebras.ai/v1/chat/completions', model: 'gpt-oss-120b', token: 'CEREBRAS_API_KEY', supportsVision: false },
-        { name: 'Cloudflare', url: `https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/google/gemma-4-26b-a4b-it`, model: '@cf/google/gemma-4-26b-a4b-it', token: 'CF_API_TOKEN', isCloudflare: true, supportsVision: true },
-        { name: 'Mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-large-latest', token: 'MISTRAL_API_KEY', supportsVision: true }
+        { name: 'Cerebras', url: 'https://api.cerebras.ai/v1/chat/completions', model: 'gpt-oss-120b', token: 'CEREBRAS_API_KEY', maxOutput: 8192, supportsVision: false },
+        { name: 'Cloudflare', url: `https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/google/gemma-4-26b-a4b-it`, model: '@cf/google/gemma-4-26b-a4b-it', token: 'CF_API_TOKEN', maxOutput: 4096, isCloudflare: true, supportsVision: true },
+        { name: 'Mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-large-latest', token: 'MISTRAL_API_KEY', maxOutput: 8192, supportsVision: true }
     ],
     embeddings: [
         { name: 'Cloudflare', url: 'https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/baai/bge-large-en-v1.5', token: 'CF_API_TOKEN', isCloudflare: true }
     ],
     cloudflare_vision: [
-        { name: 'Cloudflare', url: 'https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct', token: 'CF_API_TOKEN', isCloudflare: true }
+        { name: 'Cloudflare', url: 'https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct', token: 'CF_API_TOKEN', maxOutput: 4096, isCloudflare: true }
     ],
-    // 🟢 FIXED: Removed broken phoenix model, added stable-diffusion-xl-lightning
     image_generation: [
         { name: 'Cloudflare Flux', url: 'https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/black-forest-labs/flux-1-schnell', model: '@cf/black-forest-labs/flux-1-schnell', token: 'CF_API_TOKEN', isCloudflare: true, isImage: true },
         { name: 'Cloudflare SDXL Lightning', url: 'https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/stabilityai/stable-diffusion-xl-lightning', model: '@cf/stabilityai/stable-diffusion-xl-lightning', token: 'CF_API_TOKEN', isCloudflare: true, isImage: true }
@@ -189,7 +188,6 @@ const executeAI = async (req, res) => {
             if (found) targetList.push(found);
         }
         if (targetList.length === 0) {
-            // Streamlined to use the single optimized Flux generation worker node
             targetList = [...PROVIDER_POOL.image_generation];
         }
         targetTier = 'image_generation';
@@ -219,7 +217,6 @@ const executeAI = async (req, res) => {
         }
     }
 
-    // Filter out blacklisted tokens smoothly
     targetList = targetList.filter(target => {
         const fullModelIdentifier = (target.model || '').toLowerCase();
         const fullUrlIdentifier = (target.url || '').toLowerCase();
@@ -233,10 +230,16 @@ const executeAI = async (req, res) => {
     let lastError = null;
 
     // 2. ACTIVE FAILOVER LOOP OPERATION
-    for (const target of targetList) {
+    for (let i = 0; i < targetList.length; i++) {
+        const target = targetList[i];
         const credentials = getValidCredentialSet(target);
         if (!credentials) continue; 
+        
         if (containsImages && !target.supportsVision && !target.isImage) continue;
+
+        if (!containsImages && target.supportsVision && i < targetList.length - 1) {
+            continue;
+        }
 
         try {
             const headers = { 'Authorization': `Bearer ${credentials.apiKey}`, 'Content-Type': 'application/json' };
@@ -246,7 +249,6 @@ const executeAI = async (req, res) => {
             
             if (target.isImage) {
                 const promptText = sanitizedMessages.map(m => m.content).join(' ');
-                // Clean input mapping: Passes pure text description payload to eliminate upstream 400 parameter errors
                 payload = { prompt: promptText };
             } else if (target.isCloudflare) {
                 payload = { messages: sanitizedMessages, stream };
@@ -276,7 +278,13 @@ const executeAI = async (req, res) => {
                     if (extractedBase64) payload.image = [...Buffer.from(extractedBase64, 'base64')];
                 }
             } else {
-                payload = { model: target.model, messages: sanitizedMessages, stream, max_tokens: 4000 };
+                payload = { model: target.model, messages: sanitizedMessages, stream };
+            }
+
+            // 🟢 DYNAMIC MAX TOKENS: Reads exactly what the provider officially supports 
+            // Falls back to a safe 4096 tokens if the property is somehow missing.
+            if (!target.isImage) {
+                payload.max_tokens = target.maxOutput || 4096;
             }
 
             if (target.extraBody) payload = { ...payload, ...target.extraBody };
@@ -284,7 +292,8 @@ const executeAI = async (req, res) => {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), target.isImage ? 30000 : 20000); 
 
-            console.log(`[AI Broker] Attempting delivery route matrix on target: ${target.name} (${target.model})`);
+            console.log(`[AI Broker] Attempting delivery route matrix on target: ${target.name} (${target.model}) | Output Ceiling: ${payload.max_tokens}`);
+            
             const response = await fetch(targetUrl, { method: 'POST', headers, body: JSON.stringify(payload), signal: controller.signal });
             clearTimeout(timeoutId);
 

@@ -170,6 +170,15 @@ hubRouter.get('/paas/project-connection/:name', getProjectConnectionDetails);
 
 app.use('/hub', hubRouter);
 
+app.get('/api/health', (req, res) => {
+    return res.status(200).json({
+        success: true,
+        status: "UPTIME_OK",
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Place it directly ABOVE this existing block:
 const PORT = process.env.PORT || 7860;
 app.listen(PORT, () => {
     console.log(`🚀 SMSRam BaaS API successfully running on port ${PORT}`);

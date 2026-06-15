@@ -30,68 +30,57 @@ function detectLinkType(url) {
   return null;
 }
 
-// ─── AI response parser (multi-strategy) ────────────────────────────────────
-// The model sometimes wraps output in ```json fences, sometimes returns bare
-// JSON, and sometimes prefixes it with prose. We try each strategy in order.
+// ─── Bulletproof AI response parser ─────────────────────────────────────────
+// Handles perfect JSON, Markdown-fenced JSON, and heavily Truncated/Broken JSON.
 
 function parseAIResponse(raw) {
-  if (!raw || typeof raw !== 'string') throw new Error('Empty AI response');
+  if (!raw || typeof raw !== 'string') return { summary: '', content: '', techStack: '' };
 
-  // Strategy 1 — extract first {...} block that contains our expected keys
-  // This handles the case where the model wraps JSON in ```json ... ``` or
-  // prepends/appends prose around the JSON object.
-  const jsonBlockMatch = raw.match(/\{[\s\S]*?"summary"[\s\S]*?\}/);
-  if (jsonBlockMatch) {
-    try {
-      const parsed = JSON.parse(jsonBlockMatch[0]);
-      if (parsed.summary !== undefined) return parsed;
-    } catch {
-      // fall through to next strategy
-    }
-  }
+  // Strip markdown formatting fences
+  let text = raw.replace(/^```[a-zA-Z]*\n?/g, '').replace(/```$/g, '').trim();
+  
+  const startIdx = text.indexOf('{');
+  if (startIdx !== -1) text = text.slice(startIdx);
 
-  // Strategy 2 — strip ALL code fence variants then parse
-  // Handles: ```json, ```JSON, ``` json, ```, and trailing ```
-  const stripped = raw
-    .replace(/```[a-zA-Z]*\s*/g, '')  // opening fences with optional lang tag
-    .replace(/```/g, '')               // any remaining closing fences
-    .trim();
+  // Strategy 1: Attempt standard Parse
   try {
-    const parsed = JSON.parse(stripped);
-    if (parsed.summary !== undefined) return parsed;
-  } catch {
-    // fall through
-  }
+    const parsed = JSON.parse(text);
+    if (parsed.summary !== undefined || parsed.content !== undefined) return parsed;
+  } catch (e) {}
 
-  // Strategy 3 — find the outermost { ... } by bracket counting
-  // Handles cases where the model outputs text before or after the JSON blob
-  let depth = 0;
-  let start = -1;
-  for (let i = 0; i < raw.length; i++) {
-    if (raw[i] === '{') {
-      if (depth === 0) start = i;
-      depth++;
-    } else if (raw[i] === '}') {
-      depth--;
-      if (depth === 0 && start !== -1) {
-        try {
-          const candidate = raw.slice(start, i + 1);
-          const parsed = JSON.parse(candidate);
-          if (parsed.summary !== undefined) return parsed;
-        } catch {
-          // keep scanning
-          start = -1;
-        }
-      }
-    }
-  }
+  // Strategy 2: Mathematical JSON Repair (closes missing quotes/brackets from truncated AI responses)
+  let repaired = text;
+  // Count unescaped quotes to see if string was left open
+  const quoteCount = (repaired.replace(/\\"/g, '').match(/"/g) || []).length;
+  if (quoteCount % 2 !== 0) repaired += '"';
+  if (!repaired.trim().endsWith('}')) repaired += '}';
 
-  throw new Error('Could not extract JSON from AI response');
+  try {
+    const parsed = JSON.parse(repaired);
+    if (parsed.summary !== undefined || parsed.content !== undefined) return parsed;
+  } catch (e) {}
+
+  // Strategy 3: Hard Regex Extraction (Last resort for severely mangled generation)
+  console.warn("JSON Repair failed. Using regex extraction for truncated AI response.");
+  const safeExtract = (key) => {
+    const regex = new RegExp(`"${key}"\\s*:\\s*"([\\s\\S]*?)(?="\\s*,\\s*"\\w+"\\s*:|"\\s*\\}|$)`);
+    const match = text.match(regex);
+    if (!match) return '';
+    let val = match[1];
+    
+    // Clean up a hanging quote if truncated exactly at end
+    if (val.endsWith('"') && !val.endsWith('\\"')) val = val.slice(0, -1);
+    
+    return val.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\').trim();
+  };
+
+  return {
+    summary: safeExtract('summary'),
+    content: safeExtract('content'),
+    techStack: safeExtract('techStack') || safeExtract('techstack')
+  };
 }
 
-// After JSON.parse, string values may still contain literal \n (backslash + n)
-// instead of real newlines — happens when the model serializes multiline strings
-// without proper escaping. Normalizes all string fields in the parsed result.
 function normalizeAIResult(obj) {
   const out = {};
   for (const [key, val] of Object.entries(obj)) {
@@ -202,13 +191,16 @@ async function callBaasAI(prompt) {
 
   const data = await res.json();
   if (!data.success) throw new Error('BAAS AI returned failure');
+
+  console.log("=== API NETWORK RESPONSE BODY ===\n", data);
+
   return data.content;
 }
 
-// ─── Build prompts ───────────────────────────────────────────────────────────
+// ─── Build prompts (With strict JSON enforcement) ────────────────────────────
 
-function buildYouTubePrompt(meta, userPrompt) {
-  return `You are a technical content writer. Based on the YouTube video details below, generate structured content for a portfolio asset entry.
+function buildYouTubePrompt(meta, userPrompt, targetType) {
+  return `You are an automated, strict JSON-only serialization engine. Based on the YouTube video details below, generate structured content for a ${targetType || 'VIDEO'} portfolio entry.
 
 VIDEO DETAILS:
 - Title: ${meta.title}
@@ -219,17 +211,22 @@ VIDEO DETAILS:
 
 ${userPrompt ? `ADDITIONAL CONTEXT FROM USER: ${userPrompt}` : ''}
 
-Generate ONLY the following three fields. Return as a RAW JSON object — no markdown fences, no code blocks, no extra text before or after.
+CRITICAL INSTRUCTIONS:
+- You must output exactly one valid JSON object. 
+- Do NOT include any introductory sentences (e.g., "Here is the generated content:").
+- Do NOT wrap the JSON inside markdown code blocks or backticks (e.g., \`\`\`json ... \`\`\`).
+- Your entire response must begin with the character '{' and end with the character '}'.
 
+JSON Schema Structure:
 {
-  "summary": "2-3 sentence plain description of what the video covers. No marketing language, hashtags, or channel promotions.",
-  "content": "Rich Markdown body with ## headings and bullet points covering key topics. NO YouTube tags, hashtags, subscription prompts, or search keywords. Focus on educational/technical value only.",
+  "summary": "2-3 sentence plain description of what the video covers.",
+  "content": "Rich Markdown body with ## headings and bullet points covering key topics. Format specifically for a ${targetType || 'VIDEO'} asset entrance.",
   "techStack": "Comma-separated technologies/tools shown in the video. Empty string if none."
 }`;
 }
 
-function buildGitHubPrompt(meta, userPrompt) {
-  return `You are a technical content writer. Based on the GitHub repository details below, generate structured content for a portfolio asset entry.
+function buildGitHubPrompt(meta, userPrompt, targetType) {
+  return `You are an automated, strict JSON-only serialization engine. Based on the GitHub repository details below, generate structured content for a ${targetType || 'SOURCE'} portfolio entry.
 
 REPOSITORY DETAILS:
 - Name: ${meta.title}
@@ -245,11 +242,16 @@ ${meta.readme || 'No README available.'}
 
 ${userPrompt ? `ADDITIONAL CONTEXT FROM USER: ${userPrompt}` : ''}
 
-Generate ONLY the following three fields. Return as a RAW JSON object — no markdown fences, no code blocks, no extra text before or after.
+CRITICAL INSTRUCTIONS:
+- You must output exactly one valid JSON object. 
+- Do NOT include any introductory sentences (e.g., "Here is the generated content:").
+- Do NOT wrap the JSON inside markdown code blocks or backticks (e.g., \`\`\`json ... \`\`\`).
+- Your entire response must begin with the character '{' and end with the character '}'.
 
+JSON Schema Structure:
 {
   "summary": "2-3 sentence plain description of what the project does and who it is for.",
-  "content": "Rich Markdown write-up with ## headings (Overview, Features, Architecture/Usage). Synthesize and rewrite — do NOT copy-paste README. Omit badges, license, contribution guides, and boilerplate.",
+  "content": "Rich Markdown write-up with ## headings (Overview, Features, Architecture/Usage). Synthesize and rewrite information from the README. Format specifically for a ${targetType || 'SOURCE'} asset entrance.",
   "techStack": "Comma-separated technologies, frameworks, and tools used."
 }`;
 }
@@ -257,7 +259,7 @@ Generate ONLY the following three fields. Return as a RAW JSON object — no mar
 // ─── Main controller exports ─────────────────────────────────────────────────
 
 exports.analyzeLink = async (req, res) => {
-  const { url, prompt: userPrompt } = req.body || {};
+  const { url, prompt: userPrompt, targetType } = req.body || {};
 
   if (!url) {
     return res.status(400).json({ success: false, message: 'URL is required.' });
@@ -276,16 +278,19 @@ exports.analyzeLink = async (req, res) => {
     let metadata = null;
     let aiPrompt = '';
     let prefill = {};
+    
+    // Override the detected type if user explicitly selected a different category in form
+    const finalType = targetType || detectedType;
 
     if (detectedType === 'VIDEO') {
       const videoId = extractYouTubeId(url);
       if (!videoId) return res.status(400).json({ success: false, message: 'Could not extract YouTube video ID.' });
 
       metadata = await fetchYouTubeMetadata(videoId);
-      aiPrompt = buildYouTubePrompt(metadata, userPrompt);
+      aiPrompt = buildYouTubePrompt(metadata, userPrompt, finalType);
 
       prefill = {
-        type: 'VIDEO',
+        type: finalType,
         title: metadata.title,
         metaDynamic: {
           youtube_id: metadata.videoId,
@@ -297,10 +302,10 @@ exports.analyzeLink = async (req, res) => {
       if (!repoInfo) return res.status(400).json({ success: false, message: 'Could not extract GitHub repo info.' });
 
       metadata = await fetchGitHubMetadata(repoInfo.owner, repoInfo.repo);
-      aiPrompt = buildGitHubPrompt(metadata, userPrompt);
+      aiPrompt = buildGitHubPrompt(metadata, userPrompt, finalType);
 
       prefill = {
-        type: 'SOURCE',
+        type: finalType,
         title: metadata.title.split('/')[1] || metadata.title,
         metaDynamic: {
           repo_url: metadata.repoUrl,
@@ -311,15 +316,8 @@ exports.analyzeLink = async (req, res) => {
 
     const aiRawContent = await callBaasAI(aiPrompt);
 
-    // Parse with multi-strategy extractor — handles fenced, prefixed, or bare JSON
-    let aiResult = {};
-    try {
-      aiResult = normalizeAIResult(parseAIResponse(aiRawContent));
-    } catch (parseErr) {
-      console.warn('AI parse fallback triggered:', parseErr.message);
-      // Last resort: surface the raw text so the admin can still see something
-      aiResult = { summary: '', content: aiRawContent, techStack: '' };
-    }
+    // Bulletproof JSON Parsing Call
+    const aiResult = normalizeAIResult(parseAIResponse(aiRawContent));
 
     return res.json({
       success: true,

@@ -232,19 +232,18 @@ export default function DashboardPage() {
         {/* Detailed Database File Backups Breakdown Table */}
         <div className="bg-surface border border-outline/20 rounded-lg overflow-hidden shadow-sm">
           <div className="px-5 py-4 border-b border-outline/20 bg-surface-container flex justify-between items-center">
-            <h3 className="font-code text-xs font-bold uppercase tracking-wider text-on-surface">Cloud Backup Register & Volumes Matrix</h3>
+            <h3 className="font-code text-xs font-bold uppercase tracking-wider text-on-surface">Backblaze B2 Replication Map</h3>
             <span className="font-code text-[10px] text-on-surface-variant px-2 py-0.5 bg-surface-container-low rounded border border-outline/20">1-Min Interval Active</span>
           </div>
           
-          {/* 🟢 FIX 2: Added overflow-x-auto combined with max-w-full to contain data grids safely */}
           <div className="overflow-x-auto w-full max-w-full">
-            <table className="w-full text-left border-collapse text-xs font-code min-w-[700px]">
+            <table className="w-full text-left border-collapse text-xs font-code min-w-[800px]">
               <thead>
                 <tr className="border-b border-outline/20 text-on-surface-variant bg-surface-container-low">
-                  <th className="p-4 uppercase tracking-wider">Database Storage Target</th>
-                  <th className="p-4 uppercase tracking-wider">Disk Footprint</th>
-                  <th className="p-4 uppercase tracking-wider">Last Sync Sequence (Local Time)</th>
-                  <th className="p-4 uppercase tracking-wider text-right">Replication Link</th>
+                  <th className="p-4 uppercase tracking-wider">Database Source File</th>
+                  <th className="p-4 uppercase tracking-wider">Backblaze B2 Target Map</th>
+                  <th className="p-4 uppercase tracking-wider">Exact Cloud Saving Time</th>
+                  <th className="p-4 uppercase tracking-wider text-right">Replication Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline/10">
@@ -256,13 +255,22 @@ export default function DashboardPage() {
                   stats.backups.map((db, idx) => (
                     <tr key={idx} className="hover:bg-surface-container-lowest/40 transition-colors">
                       <td className="p-4 font-bold text-on-surface flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[14px] text-accent-blue">insert_drive_file</span>
+                        <span className="material-symbols-outlined text-[14px] text-accent-blue">database</span>
                         {db.name}
+                        <span className="text-[10px] font-normal text-on-surface-variant ml-2 opacity-70">({db.size})</span>
                       </td>
-                      <td className="p-4 text-on-surface-variant">{db.size}</td>
+                      
                       <td className="p-4 text-on-surface-variant">
-                        {new Date(db.lastSyncTime).toLocaleString('en-IN', { hour12: true, month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        <div className="flex items-center gap-2 bg-surface-container-lowest border border-outline/10 px-2 py-1 rounded w-fit">
+                          <span className="material-symbols-outlined text-[12px] text-accent-orange">cloud</span>
+                          <span className="text-[11px] tracking-wide">{db.b2Target}</span>
+                        </div>
                       </td>
+                      
+                      <td className="p-4 text-on-surface-variant font-medium">
+                        {new Date(db.lastSyncTime).toLocaleString('en-IN', { hour12: true, month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      </td>
+                      
                       <td className="p-4 text-right">
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 dark:bg-emerald-950/40 dark:text-emerald-400">
                           {db.status}

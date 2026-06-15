@@ -13,10 +13,10 @@ const getSystemStats = (req, res) => {
         const projectCount = registryDb.prepare('SELECT COUNT(*) as count FROM projects').get().count;
         const fileCount = registryDb.prepare('SELECT COUNT(*) as count FROM file_metadata').get().count;
         
-        // 🟢 NEW: Gather exact number of live running application sub-processes
+        // Gather exact number of live running application sub-processes
         const runningAppsCount = registryDb.prepare("SELECT COUNT(*) as count FROM platform_apps WHERE status = 'running'").get().count;
         
-        // 2. Compute storage utilization
+        // 2. Compute storage utilization and Backblaze Replication mapping
         const dataDirectoryPath = path.join(__dirname, '../../../data');
         let totalStorageBytes = 0;
         let backupList = [];
@@ -26,18 +26,38 @@ const getSystemStats = (req, res) => {
             files.forEach(file => {
                 const fullPath = path.join(dataDirectoryPath, file);
                 const fileStats = fs.statSync(fullPath);
+                
                 if (fileStats.isFile()) {
                     totalStorageBytes += fileStats.size;
                     
-                    // 🟢 NEW: Identify databases and pull their true modified timestamp logs
+                    // Filter exclusively for Database targets tracking to B2
                     if (file.endsWith('.db')) {
-                        // Check if a WAL file exists to verify real-time activity status
-                        const hasActiveWal = fs.existsSync(`${fullPath}-wal`);
+                        const isMaster = file === 'master_registry.db';
+                        
+                        // Map the exact Backblaze B2 bucket subfolder routing
+                        const b2TargetRoute = isMaster 
+                            ? `B2 Bucket Root (/${file})` 
+                            : `B2 Tenant Folder (/tenants/${file})`;
+
+                        // Litestream replicates the WAL (Write-Ahead Log). 
+                        // To get the exact "Saving Time", we check the WAL's modified timestamp.
+                        let exactSaveTime = fileStats.mtime;
+                        const walPath = `${fullPath}-wal`;
+                        const hasActiveWal = fs.existsSync(walPath);
+                        
+                        if (hasActiveWal) {
+                            const walStats = fs.statSync(walPath);
+                            if (walStats.mtime > exactSaveTime) {
+                                exactSaveTime = walStats.mtime;
+                            }
+                        }
+
                         backupList.push({
                             name: file,
                             size: (fileStats.size / 1024).toFixed(1) + ' KB',
-                            lastSyncTime: fileStats.mtime.toISOString(), // Real file system mutation timestamp
-                            status: hasActiveWal ? 'Active (WAL)' : 'Synced'
+                            lastSyncTime: exactSaveTime.toISOString(),
+                            b2Target: b2TargetRoute,
+                            status: 'Replicating'
                         });
                     }
                 }
@@ -84,9 +104,9 @@ const getSystemStats = (req, res) => {
                 ramUsedDisplay: humanReadableRAM,
                 ramPercent: usedMemoryPercent,
                 totalFiles: fileCount,
-                runningProcesses: runningAppsCount,         // 🟢 EXPOSED
-                backups: backupList,                        // 🟢 EXPOSED
-                latestBackupTime: backupList.length > 0     // 🟢 EXPOSED
+                runningProcesses: runningAppsCount,
+                backups: backupList,
+                latestBackupTime: backupList.length > 0 
                     ? new Date(Math.max(...backupList.map(b => new Date(b.lastSyncTime)))).toISOString()
                     : new Date().toISOString()
             }

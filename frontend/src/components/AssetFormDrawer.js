@@ -114,7 +114,12 @@ export default function AssetFormDrawer({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${adminToken}`,
         },
-        body: JSON.stringify({ url: aiUrl.trim(), prompt: aiPrompt.trim() }),
+        // ADDED targetType: formData.type TO THE PAYLOAD
+        body: JSON.stringify({ 
+          url: aiUrl.trim(), 
+          prompt: aiPrompt.trim(),
+          targetType: formData.type 
+        }),
       });
 
       const data = await res.json();
