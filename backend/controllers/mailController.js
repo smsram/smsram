@@ -71,8 +71,7 @@ exports.sendContactMail = async (req, res) => {
             <hr style="border: none; border-top: 1px solid #d0d7de; margin: 24px 0;" />
             <p style="font-size: 14px; line-height: 1.6; color: #57606a; margin-bottom: 0;">
               Best regards,<br />
-              <span style="color: #24292f; font-weight: bold;">Meher Siva Ram Sorampudi</span><br />
-              <span style="font-size: 12px; color: #8c959f;">Full-Stack Developer & Aspiring ML Engineer</span>
+              <span style="color: #24292f; font-weight: bold;">Meher Siva Ram Sorampudi</span>
             </p>
           </div>
         `

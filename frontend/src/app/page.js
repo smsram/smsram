@@ -145,15 +145,15 @@ export default function PortfolioLandingPage() {
             
             <div className="md:col-span-7 lg:col-span-8 text-center md:text-left flex flex-col items-center md:items-start w-full whitespace-normal break-normal">
               
-              <h1 className="text-5xl sm:text-6xl lg:text-[5.5rem] font-bold text-primary tracking-tighter leading-[1.05] w-full">
-                Software & <br className="hidden lg:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-orange via-accent-purple to-accent-blue animate-gradient-text">
-                  Machine Learning
-                </span><br className="hidden lg:block" /> Engineer.
+              <h1 className="text-4xl sm:text-6xl lg:text-[4.8rem] font-bold text-primary tracking-tighter leading-[1.05] w-full">
+                Full-Stack Developer & <br className="hidden lg:block" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-blue via-accent-purple to-accent-orange animate-gradient-text">
+                  Aspiring ML Engineer.
+                </span>
               </h1>
               
-              <p className="text-lg sm:text-xl font-body text-on-surface-variant max-w-2xl leading-relaxed mt-6 mb-10 mx-auto md:mx-0 w-full whitespace-normal break-words">
-                Hi, I'm <b className="text-primary">Meher Siva Ram Sorampudi</b>. I build high-performance full-stack architectures and design automated data pipelines for predictive intelligence models.
+              <p className="text-base sm:text-lg font-body text-on-surface-variant max-w-2xl leading-relaxed mt-6 mb-10 mx-auto md:mx-0 w-full whitespace-normal break-words">
+                Hi, I'm <b className="text-primary">Meher Siva Ram Sorampudi</b>. I build resilient full-stack systems and specialize in deployment architecture and intelligent, production-ready <b className="text-accent-blue">AI integrations</b>.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
@@ -172,7 +172,7 @@ export default function PortfolioLandingPage() {
               <div className="w-56 sm:w-64 lg:w-80 aspect-square rounded-2xl overflow-hidden border-2 border-outline-variant shadow-2xl bg-surface-container p-2 relative z-10 hover:scale-105 transition-transform duration-500">
                 <img src="/smsram.jpg" alt="Meher Siva Ram" className="w-full h-full object-cover rounded-xl border border-outline-variant" />
               </div>
-              <div className="absolute inset-0 bg-accent-purple/30 blur-3xl rounded-full -z-10 transform translate-y-6 opacity-50" />
+              <div className="absolute inset-0 bg-accent-blue/30 blur-3xl rounded-full -z-10 transform translate-y-6 opacity-50" />
             </div>
 
           </section>
@@ -204,7 +204,7 @@ export default function PortfolioLandingPage() {
         </section>
 
         {/* ========================================================
-            3. ABOUT ME SECTION
+            3. ABOUT ME SECTION (Cleanly Partitioned)
         ======================================================== */}
         <ScrollReveal>
           <section className="mb-24 text-left w-full">
@@ -213,16 +213,16 @@ export default function PortfolioLandingPage() {
               <div className="absolute -right-20 -top-20 w-64 h-64 bg-accent-blue/10 blur-3xl rounded-full pointer-events-none" />
               
               <div className="flex items-center gap-2 mb-6">
-                <span className="material-symbols-outlined text-accent-blue text-[20px]">person</span>
-                <h3 className="font-code text-xs uppercase tracking-widest font-bold text-on-surface-variant">Profile</h3>
+                <span className="material-symbols-outlined text-accent-blue text-[20px]">terminal</span>
+                <h3 className="font-code text-xs uppercase tracking-widest font-bold text-on-surface-variant">Technical Profile</h3>
               </div>
               
-              <div className="font-body text-sm sm:text-base text-on-surface-variant max-w-4xl leading-relaxed space-y-4 w-full whitespace-normal break-words">
+              <div className="font-body text-sm sm:text-base text-on-surface-variant max-w-4xl leading-relaxed space-y-6 w-full whitespace-normal break-words">
                 <p>
-                  My core development competencies reside in launching end-to-end full-stack websites and Android applications integrated with AI, utilizing systems like <span className="text-primary font-bold">Next.js, Node.js, React Native, and Docker</span>.
+                  I specialize in bridging the gap between robust web architectures and intelligent systems. Currently pursuing my B.Tech specializing in Artificial Intelligence and Machine Learning, I design and deploy scalable applications using <span className="text-primary font-bold">Next.js, Node.js, React Native, SQL databases, and Python</span>. My primary focus lies in creating seamless <span className="text-accent-blue font-bold">AI integrations</span>—taking complex backend or data-driven models and giving them highly functional, production-ready interfaces.
                 </p>
-                <p>
-                  I am currently advancing my engineering targets to become a <span className="text-primary font-bold">Machine Learning Engineer</span>. I focus on training computer vision systems, tuning matrix weights, and parsing data sequences down client-side via optimized computational wrappers.
+                <p className="pt-4 border-t border-outline-variant/40">
+                  Beyond core structural development, I actively apply these engineering principles to handle comprehensive project lifecycles. I am highly focused on managing complete development pipelines, coordinating with technical teams in rapid environments, and designing end-to-end software solutions that combine modern full-stack workflows with automated machine learning execution capabilities.
                 </p>
               </div>
 
@@ -291,29 +291,23 @@ export default function PortfolioLandingPage() {
         ======================================================== */}
         <ScrollReveal>
           <section className="mb-20 w-full block">
-            {/* Block-level outer layout deck centered via auto margins */}
             <div className="w-full max-w-[800px] mx-auto bg-surface-container-lowest border border-outline-variant rounded-2xl p-8 sm:p-12 md:p-16 text-center shadow-sm relative overflow-hidden block">
               
-              {/* Decorative Gradient Glow Orbs */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-accent-orange/10 blur-3xl rounded-full pointer-events-none" />
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-purple/10 blur-3xl rounded-full pointer-events-none" />
               
-              {/* Icon Wrapper Context */}
               <div className="relative z-10 mb-4 block text-center">
                 <span className="material-symbols-outlined text-4xl text-accent-orange inline-block">handshake</span>
               </div>
               
-              {/* Call to Action Section Heading */}
               <h3 className="font-display text-3xl md:text-4xl font-bold text-primary tracking-tight relative z-10 mb-4 block w-full text-center">
                 Let's Build Something Together
               </h3>
               
-              {/* FIXED: Explicitly forced block display with min-width rules stops compression wrapping anomalies completely */}
               <p className="text-on-surface-variant font-body text-base md:text-lg mb-8 leading-relaxed relative z-10 mx-auto block w-full max-w-xl text-center min-w-full sm:min-w-[500px] tracking-normal whitespace-normal break-normal word-break-normal">
                 Interested in working together or have a question? Feel free to reach out and establish a connection.
               </p>
               
-              {/* Dynamic Action Interaction Link Gateway Button */}
               <div className="relative z-10 block w-full text-center">
                 <Link href="/contact" className="h-11 px-6 bg-primary text-on-primary font-display font-bold text-xs uppercase tracking-widest rounded shadow-sm hover:opacity-90 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-2 no-underline">
                   <span>Contact Me</span>

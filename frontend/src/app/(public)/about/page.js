@@ -24,10 +24,10 @@ export default function AboutPage() {
           <div className="flex-1 text-left min-w-0" style={{ display: 'block' }}>
             <h2 className="font-display text-3xl font-bold text-primary tracking-tight">Meher Siva Ram Sorampudi</h2>
             <p className="text-on-surface-variant font-code text-xs mt-1 uppercase tracking-widest font-bold text-accent-blue">
-              Machine Learning Engineer & Full-Stack Developer
+              Full-Stack Developer & Aspiring ML Engineer
             </p>
             <p className="text-sm font-body-sm text-on-surface-variant leading-relaxed mt-4 max-w-3xl">
-              Third-year B.Tech student specializing in Artificial Intelligence and Machine Learning at Godavari Global University. Transitioning from full-stack software development to core ML systems engineering. Focused on building predictive model pipelines, computer vision document security modules, and automated distributed deployment grids.
+              Pursuing a B.Tech specializing in Artificial Intelligence and Machine Learning at Godavari Global University. I combine a strong foundation in modern web infrastructure (Next.js, Node.js) with data programming tools to design and deploy scalable architectures and seamless <b className="text-accent-blue">AI integrations</b>. Passionate about constructing full-stack ecosystems that turn data-driven models into production-ready software solutions.
             </p>
             
             {/* Portfolio Link Button Redirecting to / */}
@@ -87,21 +87,21 @@ export default function AboutPage() {
               
               <div style={{ display: 'block' }}>
                 <div className="flex justify-between font-code text-xs uppercase tracking-wider mb-2">
-                  <span className="text-primary font-medium">Machine Learning</span>
-                  <span className="text-on-surface-variant opacity-80">Ongoing</span>
+                  <span className="text-primary font-medium">Full-Stack Architecture & UI</span>
+                  <span className="text-on-surface-variant opacity-80">92%</span>
                 </div>
                 <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
-                  <div className="h-full bg-accent-blue rounded-full" style={{ width: '60%' }} />
+                  <div className="h-full bg-accent-orange rounded-full" style={{ width: '92%' }} />
                 </div>
               </div>
 
               <div style={{ display: 'block' }}>
                 <div className="flex justify-between font-code text-xs uppercase tracking-wider mb-2">
-                  <span className="text-primary font-medium">Full-Stack & Mobile</span>
-                  <span className="text-on-surface-variant opacity-80">92%</span>
+                  <span className="text-primary font-medium">AI Integrations & ML Workflow</span>
+                  <span className="text-on-surface-variant opacity-80">Ongoing Focus</span>
                 </div>
                 <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
-                  <div className="h-full bg-accent-orange rounded-full" style={{ width: '92%' }} />
+                  <div className="h-full bg-accent-blue rounded-full" style={{ width: '65%' }} />
                 </div>
               </div>
 
