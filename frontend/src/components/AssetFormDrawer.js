@@ -65,7 +65,7 @@ export default function AssetFormDrawer({
     if (!url) return null;
     if (/youtube\.com|youtu\.be/.test(url)) return 'VIDEO';
     if (/github\.com/.test(url)) return 'SOURCE';
-    return null;
+    return 'WEB'; // Recognizes all other URLs as valid web targets
   };
 
   const toSlug = (str) =>
@@ -80,22 +80,24 @@ export default function AssetFormDrawer({
     setAiError('');
     setAiSuccess('');
 
-    // Auto-switch the Classification Type dropdown as the user types
     const detected = detectLinkType(url);
-    if (detected && detected !== formData.type) {
+    // Auto switch type if it's GitHub or YouTube, leave alone if generic WEB
+    if (detected && detected !== 'WEB' && detected !== formData.type) {
       setFormData({ ...formData, type: detected });
     }
   };
 
   const handleAiEnrich = async () => {
     if (!aiUrl.trim()) {
-      setAiError('Paste a YouTube or GitHub URL to continue.');
+      setAiError('Paste a valid URL to continue.');
       return;
     }
-    const detected = detectLinkType(aiUrl.trim());
-    if (!detected) {
-      setAiError('Only YouTube video URLs and GitHub repository URLs are supported.');
-      return;
+    
+    // Ensure URL has http/https
+    let finalUrl = aiUrl.trim();
+    if (!/^https?:\/\//i.test(finalUrl)) {
+      finalUrl = 'https://' + finalUrl;
+      setAiUrl(finalUrl);
     }
 
     setAiLoading(true);
@@ -104,9 +106,7 @@ export default function AssetFormDrawer({
 
     try {
       const serverUrl = process.env.NEXT_PUBLIC_SERVER_API_URL || 'http://localhost:5000';
-      const adminToken = typeof window !== 'undefined'
-        ? localStorage.getItem('admin_session_token')
-        : '';
+      const adminToken = typeof window !== 'undefined' ? localStorage.getItem('admin_session_token') : '';
 
       const res = await fetch(`${serverUrl}/api/ai/analyze`, {
         method: 'POST',
@@ -114,9 +114,8 @@ export default function AssetFormDrawer({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${adminToken}`,
         },
-        // ADDED targetType: formData.type TO THE PAYLOAD
         body: JSON.stringify({ 
-          url: aiUrl.trim(), 
+          url: finalUrl, 
           prompt: aiPrompt.trim(),
           targetType: formData.type 
         }),
@@ -128,39 +127,18 @@ export default function AssetFormDrawer({
         throw new Error(data.message || 'AI enrichment failed.');
       }
 
-      // Backend response shape:
-      // {
-      //   success: true,
-      //   detectedType: 'VIDEO' | 'SOURCE',
-      //   prefill: {
-      //     type, title, summary, content, tagsRaw,
-      //     metaDynamic: { youtube_id, duration }   ← VIDEO
-      //     metaDynamic: { repo_url, language }     ← SOURCE
-      //   }
-      // }
       const { prefill } = data;
-
-      // Build the slug from the AI-supplied title, stripping any "owner/repo" slash
       const rawTitle  = prefill.title || '';
-      const cleanTitle = rawTitle.includes('/')
-        ? rawTitle.split('/').pop()   // keep only the repo name part
-        : rawTitle;
+      const cleanTitle = rawTitle.includes('/') ? rawTitle.split('/').pop() : rawTitle;
 
       setFormData((prev) => ({
         ...prev,
-
-        // Core identity fields
         type:  prefill.type  || prev.type,
         title: cleanTitle    || prev.title,
         slug:  cleanTitle ? toSlug(cleanTitle) : prev.slug,
-
-        // AI-generated text fields
         summary:  prefill.summary  || prev.summary,
         content:  prefill.content  || prev.content,
         tagsRaw:  prefill.tagsRaw  || prev.tagsRaw,
-
-        // Merge type-specific meta fields coming in prefill.metaDynamic
-        // e.g. { youtube_id, duration } or { repo_url, language }
         metaDynamic: {
           ...(prev.metaDynamic || {}),
           ...(prefill.metaDynamic || {}),
@@ -200,7 +178,6 @@ export default function AssetFormDrawer({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* AI Fill toggle */}
             <button
               type="button"
               onClick={() => { setAiPanelOpen((v) => !v); setAiError(''); setAiSuccess(''); }}
@@ -250,22 +227,20 @@ export default function AssetFormDrawer({
             <div className="flex items-center gap-2 mb-3">
               <span className="material-symbols-outlined text-accent-blue" style={{ fontSize: '16px' }}>auto_awesome</span>
               <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }} className="text-accent-blue">
-                AI Enrichment
+                AI Enrichment Engine
               </span>
               <span style={{ fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase', opacity: 0.6 }} className="text-on-surface-variant">
-                — YouTube or GitHub URL
+                — URL Auto-Scraper
               </span>
             </div>
 
             <div className="flex flex-col gap-2.5">
-
-              {/* URL input with type icon */}
               <div style={{ position: 'relative' }}>
                 <input
                   type="url"
                   value={aiUrl}
                   onChange={handleAiUrlChange}
-                  placeholder="https://youtube.com/watch?v=... or https://github.com/user/repo"
+                  placeholder="Paste ANY web link (YouTube, GitHub, Articles, etc.)"
                   style={{
                     width: '100%',
                     background: 'var(--color-surface)',
@@ -289,29 +264,20 @@ export default function AssetFormDrawer({
                       top: '50%',
                       transform: 'translateY(-50%)',
                       fontSize: '14px',
-                      color: detectLinkType(aiUrl) === 'VIDEO'
-                        ? '#ef4444'
-                        : detectLinkType(aiUrl) === 'SOURCE'
-                          ? '#6b7280'
-                          : 'var(--color-outline)',
+                      color: detectLinkType(aiUrl) === 'VIDEO' ? '#ef4444' : detectLinkType(aiUrl) === 'SOURCE' ? '#6b7280' : '#10b981',
                       pointerEvents: 'none',
                     }}
                   >
-                    {detectLinkType(aiUrl) === 'VIDEO'
-                      ? 'smart_display'
-                      : detectLinkType(aiUrl) === 'SOURCE'
-                        ? 'code'
-                        : 'link'}
+                    {detectLinkType(aiUrl) === 'VIDEO' ? 'smart_display' : detectLinkType(aiUrl) === 'SOURCE' ? 'code' : 'language'}
                   </span>
                 )}
               </div>
 
-              {/* Optional extra context prompt */}
               <input
                 type="text"
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
-                placeholder="Optional: extra context for AI (e.g. 'focus on the auth architecture')"
+                placeholder="Optional: extra context for AI (e.g. 'write this as a blog post')"
                 style={{
                   width: '100%',
                   background: 'var(--color-surface)',
@@ -328,11 +294,10 @@ export default function AssetFormDrawer({
                 disabled={aiLoading}
               />
 
-              {/* Auto-detected type badge */}
               {aiUrl && detectLinkType(aiUrl) && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', opacity: 0.6 }} className="text-on-surface-variant">
-                    Detected:
+                    Link Type:
                   </span>
                   <span style={{
                     fontSize: '10px',
@@ -341,38 +306,32 @@ export default function AssetFormDrawer({
                     letterSpacing: '0.08em',
                     padding: '2px 8px',
                     borderRadius: '4px',
-                    background: detectLinkType(aiUrl) === 'VIDEO' ? 'rgba(239,68,68,0.12)' : 'rgba(99,102,241,0.12)',
-                    color:      detectLinkType(aiUrl) === 'VIDEO' ? '#ef4444'              : '#6366f1',
-                    border:     `1px solid ${detectLinkType(aiUrl) === 'VIDEO' ? 'rgba(239,68,68,0.25)' : 'rgba(99,102,241,0.25)'}`,
+                    background: detectLinkType(aiUrl) === 'VIDEO' ? 'rgba(239,68,68,0.12)' : detectLinkType(aiUrl) === 'SOURCE' ? 'rgba(99,102,241,0.12)' : 'rgba(16,185,129,0.12)',
+                    color:      detectLinkType(aiUrl) === 'VIDEO' ? '#ef4444'              : detectLinkType(aiUrl) === 'SOURCE' ? '#6366f1'              : '#10b981',
+                    border:     `1px solid ${detectLinkType(aiUrl) === 'VIDEO' ? 'rgba(239,68,68,0.25)' : detectLinkType(aiUrl) === 'SOURCE' ? 'rgba(99,102,241,0.25)' : 'rgba(16,185,129,0.25)'}`,
                   }}>
-                    {detectLinkType(aiUrl) === 'VIDEO' ? '▶ Video' : '{ } Source'}
+                    {detectLinkType(aiUrl) === 'VIDEO' ? '▶ Video' : detectLinkType(aiUrl) === 'SOURCE' ? '{ } Source' : '🌐 Web Page'}
                   </span>
                   <span style={{ fontSize: '10px', opacity: 0.5 }} className="text-on-surface-variant">
-                    — type auto-selected
+                    — AI formatting targeting <b>{formData.type}</b>
                   </span>
                 </div>
               )}
 
-              {/* Inline error */}
               {aiError && (
                 <p style={{ fontSize: '11px', color: '#ef4444', margin: 0, letterSpacing: '0.04em' }}>
                   ⚠ {aiError}
                 </p>
               )}
 
-              {/* Generate button */}
               <button
                 type="button"
                 onClick={handleAiEnrich}
                 disabled={aiLoading || !aiUrl.trim()}
                 style={{
                   height: '36px',
-                  backgroundColor: aiLoading || !aiUrl.trim()
-                    ? 'var(--color-surface-container)'
-                    : 'var(--color-accent-blue)',
-                  color: aiLoading || !aiUrl.trim()
-                    ? 'var(--color-on-surface-variant)'
-                    : '#fff',
+                  backgroundColor: aiLoading || !aiUrl.trim() ? 'var(--color-surface-container)' : 'var(--color-accent-blue)',
+                  color: aiLoading || !aiUrl.trim() ? 'var(--color-on-surface-variant)' : '#fff',
                   border: 'none',
                   borderRadius: '6px',
                   fontSize: '11px',
@@ -390,13 +349,8 @@ export default function AssetFormDrawer({
               >
                 {aiLoading ? (
                   <>
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: '16px', animation: 'spin 1s linear infinite' }}
-                    >
-                      progress_activity
-                    </span>
-                    Fetching & Generating…
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px', animation: 'spin 1s linear infinite' }}>progress_activity</span>
+                    Fetching & Scraping...
                   </>
                 ) : (
                   <>
@@ -409,7 +363,7 @@ export default function AssetFormDrawer({
           </div>
         )}
 
-        {/* ── AI success banner (shown after panel closes) ─────────────── */}
+        {/* ── AI success banner ─────────────── */}
         {aiSuccess && !aiPanelOpen && (
           <div style={{
             padding: '10px 16px',
@@ -473,8 +427,7 @@ export default function AssetFormDrawer({
               Summary Brief Abstract
             </label>
             <textarea
-              required
-              rows={2}
+              required rows={2}
               value={formData.summary}
               onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
               placeholder="Provide a short overview of this component..."
@@ -491,12 +444,11 @@ export default function AssetFormDrawer({
               rows={8}
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              placeholder="Write out technical details, explanations, or blog content here using Markdown formatting (**bold**, ## headings, - lists)..."
+              placeholder="Write out technical details, explanations, or blog content here using Markdown formatting..."
               className="w-full bg-surface-container text-primary border border-outline-variant rounded px-4 py-3 font-body text-sm outline-none transition-all focus:border-outline shadow-xs resize-y custom-scrollbar leading-relaxed"
             />
           </div>
 
-          {/* Type-specific parameter fields — driven by metaDynamic */}
           {activeSchema.length > 0 && (
             <div className="bg-surface-container-lowest p-4 rounded border border-outline-variant shadow-sm space-y-3 mt-2">
               <h4 className="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold border-b border-outline-variant/60 pb-2 mb-2 flex items-center gap-2">
@@ -533,10 +485,7 @@ export default function AssetFormDrawer({
               onChange={(e) => setFormData({ ...formData, isHidden: e.target.checked })}
               className="w-4 h-4 rounded border-outline-variant text-accent-orange focus:ring-accent-orange cursor-pointer"
             />
-            <label
-              htmlFor="isHiddenCheckbox"
-              className="text-xs uppercase tracking-wider text-primary font-bold cursor-pointer select-none"
-            >
+            <label htmlFor="isHiddenCheckbox" className="text-xs uppercase tracking-wider text-primary font-bold cursor-pointer select-none">
               Hide node inside public directory routes placeholder rows
             </label>
           </div>

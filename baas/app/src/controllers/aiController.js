@@ -8,7 +8,8 @@ const crypto = require('crypto');
 
 const PROVIDER_POOL = {
     default: [
-        { name: 'Cerebras', url: 'https://api.cerebras.ai/v1/chat/completions', model: 'llama3.1-8b', token: 'CEREBRAS_API_KEY', maxOutput: 8192, supportsVision: false },
+        { name: 'Cerebras', url: 'https://api.cerebras.ai/v1/chat/completions', model: 'zai-glm-4.7', token: 'CEREBRAS_API_KEY', maxOutput: 8192, supportsVision: false },
+        
         { name: 'Cloudflare', url: `https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/google/gemma-2b-it-lora`, model: '@cf/google/gemma-2-2b-it-lora', token: 'CF_API_TOKEN', maxOutput: 4096, isCloudflare: true, supportsVision: false },
         { name: 'Cloudflare Vision', url: `https://api.cloudflare.com/client/v4/accounts/{{ACCOUNT_ID}}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`, model: '@cf/meta/llama-3.2-11b-vision-instruct', token: 'CF_API_TOKEN', maxOutput: 4096, isCloudflare: true, supportsVision: true },
         { name: 'Mistral', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest', token: 'MISTRAL_API_KEY', maxOutput: 8192, supportsVision: true }
